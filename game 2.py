@@ -15,7 +15,7 @@ tile_size = 64
 
 #create screen
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption('A beautiful beach in San Diego')
+pygame.display.set_caption('fish are friends not food')
 
 #load our game font
 custom_font = pygame.font.Font("assets/fonts/Brainfish_Rush.ttf", 48)
