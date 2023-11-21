@@ -25,14 +25,11 @@ def draw_background(surf):
     water = pygame.image.load("assets/sprites/water.png").convert()
     sand = pygame.image.load("assets/sprites/sand.png").convert()
     seamine = pygame.image.load("assets/sprites/seamine.png").convert()
-    #orange_fish = pygame.image.load("assets/sprites/orange_fish.png").convert()
-    #green_fish = pygame.image.load("assets/sprites/green_fish.png").convert()
-    #red_fish = pygame.image.load("assets/sprites/red_fish.png").convert()
-    #puffer_fish = pygame.image.load("assets/sprites/puffer_fish.png").convert()
+
 
     #use png transparency
     sand.set_colorkey((0,0,0))
-    seamine.set_colorkey((254,254,254))
+    seamine.set_colorkey((255,255,255))
 
 
     #fill the screen
@@ -47,7 +44,8 @@ def draw_background(surf):
     #draw the mines randomly
     for _ in range(4):
         x = random.randint(0, screen_width - tile_size)
-        surf.blit(seamine, (x, 0))
+        y = random.randint(tile_size, screen_height - tile_size)
+        surf.blit(seamine, (x, y))
 
 
 
@@ -58,25 +56,6 @@ def draw_background(surf):
     text = custom_font.render("Fish are Friends Not Food", True, (255, 0, 0))
     surf.blit(text, (screen_width / 2 - text.get_width() / 2, screen_height / 2 - text.get_height() / 2))
     # how to get the tiles to not overlap each other
-def draw_fishes(surf):
-    #Load our fish tiles onto our surface
-    #orange_fish =pygame.image.load('assets/sprites/orange_fish.png')
-    #set color key
-    #orange_fish.set_colorkey((0,0,0,))
-    #load green fish
-    green_fish = pygame.image.load('assets/sprites/green_fish.png')
-    #flip fish
-    green_fish = pygame.transform.flip(green_fish, True, False)
-    # set color key for green fish
-    green_fish.set_colorkey((0,0,0))
-    #distribute our green fish on the screen randomly
-    for _ in range(5):
-        x = random.randint(0, screen_width-tile_size)
-        y = random.randint(tile_size, screen_height-tile_size)
-        i = random.randint(0, screen_width - tile_size)
-        j = random.randint(tile_size, screen_height - tile_size)
-        surf.blit(orange_fish, (x,y))
-        surf.blit(green_fish,(i,j))
 
 
 
