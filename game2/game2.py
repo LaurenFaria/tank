@@ -35,16 +35,16 @@ enemy = Enemy(screen_width/2, screen_height/2)
 
 # Load new font to keep score
 score = 0
-score_font = pygame.font.Font("../assets/fonts/Black_Crayon.ttf", 48)
+score_font = pygame.font.Font("../assets/fonts/Brainfish_Rush.ttf", 48)
 
 # Load new sound
-chomp = pygame.mixer.Sound("../assets/sounds/chomp.wav")
+#chomp = pygame.mixer.Sound("../assets/sounds/chomp.wav")
 #pardon_me = pygame.mixer.Sound("../assets/sounds/Movie-08.wav")
 #hurt = pygame.mixer.Sound("../assets/sounds/hurt.wav")
 #bubbles = pygame.mixer.Sound("../assets/sounds/bubbles.wav")
 
 # Add alternate and game over
-life_icon = pygame.image.load("../assets/sprites/orange_fish_alt.png").convert()
+life_icon = pygame.image.load("../assets/sprites/orange_fish1.png").convert()
 life_icon.set_colorkey((0, 0, 0))
 
 # Set the number of lives
@@ -78,7 +78,7 @@ while lives > 0:
     result = pygame.sprite.spritecollide(player, fishes, True)
     if result:
         # Play chomp sound
-        pygame.mixer.Sound.play(chomp)
+        #pygame.mixer.Sound.play(chomp)
         score += len(result)
         add_fish(len(result))
 

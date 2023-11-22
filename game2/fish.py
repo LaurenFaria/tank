@@ -13,9 +13,9 @@ MAX_SPEED = 3
 class Fish(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        random_fish = random.choice(os.listdir("fishes"))
-        self.image = pygame.image.load(f"fishes/{random_fish}").convert()
-        self.image2 = pygame.image.load(f"fishes/{random_fish}").convert()
+        random_fish = random.choice(os.listdir("../fishes"))
+        self.image = pygame.image.load(f"../fishes/{random_fish}").convert()
+        self.image2 = pygame.image.load(f"../fishes/{random_fish}").convert()
         self.image.set_colorkey((255, 255, 255))
         self.image = pygame.transform.flip(self.image, True, False)
         self.rect = self.image.get_rect()  # Corrected from self.rect - self.image.get_rect()
