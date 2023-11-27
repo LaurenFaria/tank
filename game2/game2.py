@@ -22,7 +22,7 @@ background = screen.copy()
 draw_background(background)
 
 # Draw fish on screen
-add_fish(5)
+add_fish(3)
 
 # Add enemy to the screen
 add_enemies(3)
@@ -45,7 +45,7 @@ score_font = pygame.font.Font("../assets/fonts/Brainfish_Rush.ttf", 48)
 
 # Add alternate and game over
 life_icon = pygame.image.load("../assets/sprites/orange_fish1.png").convert()
-life_icon.set_colorkey((0, 0, 0))
+life_icon.set_colorkey((255, 255, 255))
 
 # Set the number of lives
 lives = NUM_LIVES

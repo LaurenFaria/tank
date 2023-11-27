@@ -1,21 +1,31 @@
-# a pygame sprite class for a player fish
-
 import pygame
-from game_parameters import *
+import random
 
-class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+#setting the parameters
+WIDTH, HEIGHT = 800, 600
+tile_size = 64
+PLAYER_SPEED =
+class Fish(pygame.sprite.Sprite):
+    def __init__(self, image_path):
         super().__init__()
-        self.forward_image = pygame.image.load('../assets/sprites/orange_fish1.png').convert()
-        self.forward_image.set_colorkey((255,255,255))
-        self.reverse_image = pygame.transform.flip(self.forward_image, False, False)
-        self.image = self.forward_image
+        self.image = pygame.image.load(image_path).convert_alpha()
+        self.image.set_colorkey((255,255,255))
+        self.image = pygame.transform.flip(self.image, True, False)
         self.rect = self.image.get_rect()
-        self.x = x
-        self.y = y
-        self.rect.center = (x, y)
-        self.x_speed = 0
-        self.y_speed = 0
+        self.rect.center = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
+        self.speed = 3
+
+    # Creating the player fish controls
+    def update(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            self.rect.x -= self.speed
+        if keys[pygame.K_RIGHT]:
+            self.rect.x += self.speed
+        if keys[pygame.K_UP]:
+            self.rect.y -= self.speed
+        if keys[pygame.K_DOWN]:
+            self.rect.y += self.speed
 
     def move_up(self):
         self.y_speed = -1*PLAYER_SPEED

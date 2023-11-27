@@ -59,7 +59,7 @@ def draw_fishes(surf):
     green_fish.set_colorkey((255,255,255))
     green_fish=pygame.transform.flip(green_fish, True, False)
     #load the red fish onto our surface
-    red_fish = pygame.image.load('assets/sprites/red_fish.png')
+    red_fish = pygame.image.load('red_fish.png')
     red_fish.set_colorkey((255,255,255))
     #load the yellow fish to the screen
     yellow_fish = pygame.image.load('assets/sprites/yellow_fish.png')
