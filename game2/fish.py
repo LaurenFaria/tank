@@ -1,40 +1,30 @@
-# create a pygame sprite class for a fish
-import os
-import random
 import pygame
-
-# create a pygame sprite class for a fish
 import random
-import pygame
 
-MIN_SPEED = 0.5
-MAX_SPEED = 3
+WIDTH, HEIGHT = 800, 600
+tile_size = 64
 
 class Fish(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self):
         super().__init__()
-        self.image = pygame.image.load(f"../fishes/red_fish.png").convert()
-        #self.image2 = pygame.image.load(f"../fishes/yellow_fish.png").convert()
-        #self.image3 = pygame.image.load(f"../fishes/orange_fish1.png").convert()
-        #self.image4 = pygame.image.load("f../fishes/green_fish.png").convert()
-        self.image.set_colorkey((255,255,255))
-        #self.image2.set_colorkey((255, 255, 255))
-        #self.image3.set_colorkey((255,255,255))
-        #self.image4.set_colorkey((255,255,255))
-        #self.image.set_colorkey((255,255,255))
-        self.image = pygame.transform.flip(self.image2, False, False)
-        self.rect = self.image.get_rect()  # Corrected from self.rect - self.image.get_rect()
-        #self.rect = self.image2.get_rect()
-        self.x = x
-        self.y = y
-        self.speed = random.uniform(MIN_SPEED, MAX_SPEED)
-        self.rect.center = (x, y)
+        self.image = pygame.image.load("fishes/red_fish.png").convert_alpha()
+        self.image.set_colorkey((255, 255, 255))
+        self.image = pygame.transform.flip(self.image, True, False)
+        self.rect = self.image.get_rect()
+        self.rect.center = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
+        self.speed = 3
 
+    # Creating the player fish controls
     def update(self):
-        self.x -= self.speed
-        self.rect.x = self.x
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            self.rect.x -= self.speed
+            self.image = pygame.transform.flip(self.image, True, False)
+        if keys[pygame.K_RIGHT]:
+            self.rect.x += self.speed
+            self.image = pygame.transform.flip(self.image, False, False)
+        if keys[pygame.K_UP]:
+            self.rect.y -= self.speed
+        if keys[pygame.K_DOWN]:
+            self.rect.y += self.speed
 
-    def draw(self, surf):
-        surf.blit(self.image, self.rect)
-
-fishes = pygame.sprite.Group()
