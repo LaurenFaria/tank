@@ -3,6 +3,7 @@ import random
 from fish import PlayerFish
 from seamine import Seamine
 from fishes import Fishes
+from bullet import Bullet
 
 # Constants
 WIDTH, HEIGHT = 800, 600
@@ -48,31 +49,58 @@ all_sprites = pygame.sprite.Group()
 # Creating the background fish and sea mines
 
 # Main game function
+
+
+
 def play_game():
     global player_score, player_lives
 
     player_fish = PlayerFish()
     player_fish.draw(screen)
-    #all_sprites.add(player_fish)  # Add player fish to the sprite group
+    all_sprites.add(player_fish)
 
-    # Create background fish (example)
-    for _ in range(10):
+
+    initial_fish_count = 10
+    for _ in range(initial_fish_count):
         image_path = random.choice(["fishes/orange_fish1.png", "fishes/green_fish.png", "fishes/yellow_fish.png"])
         fish = Fishes(image_path, random.randint(1, 2))
         all_sprites.add(fish)
 
-    # Create sea mines
-    for _ in range(5):
+    fish_respawn_timer = 0
+    fish_respawn_frequency = 5000
+
+    initial_seamine_count = 5
+    for _ in range(initial_seamine_count):
         seamine = Seamine()
         all_sprites.add(seamine)
 
-
+    seamine_timer = 0
+    seamine_frequency = 1000
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
+
+        all_sprites.update()
+        #check to see if all fish have been eaten then respawn 
+        if len(all_sprites.sprites()) <= initial_fish_count:
+            fish_respawn_timer += clock.get_rawtime()
+            if fish_respawn_timer >= fish_respawn_frequency:
+                image_path = random.choice(
+                    ["fishes/orange_fish1.png", "fishes/green_fish.png", "fishes/yellow_fish.png"])
+                fish = Fishes(image_path, random.randint(1, 2))
+                all_sprites.add(fish)
+                fish_respawn_timer = 0
+
+        seamine_timer += clock.get_rawtime()
+
+        if seamine_timer >= seamine_frequency:
+            seamine = Seamine()
+            all_sprites.add(seamine)
+            seamine_timer = 0
+
 
         # Update player fish position based on arrow key presses
         all_sprites.update()
@@ -94,7 +122,8 @@ def play_game():
         screen.fill(WHITE)
         draw_background(screen)
         all_sprites.draw(screen)  # Draw all sprites, including the player fish
-
+        player_fish.draw(screen)
+        player_fish.update()
         # Update the player's score and lives on the screen
         font = pygame.font.Font(None, 36)
         text = font.render(f"Score: {player_score} Lives: {player_lives}", True, BLACK)
@@ -105,23 +134,6 @@ def play_game():
         pygame.display.flip()
         clock.tick(60)
 
-# Display game over screen
-def display_game_over():
-    game_over = True
-    while game_over:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-
-        screen.fill(WHITE)
-        draw_background(screen)
-        font = pygame.font.Font(None, 48)
-        text = font.render("Game Over", True, BLACK)
-        text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
-        screen.blit(text, text_rect)
-        pygame.display.flip()
-        clock.tick(60)
 
 # Main function
 def main():
