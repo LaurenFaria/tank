@@ -238,3 +238,7 @@ if __name__ == "__main__":
 
 
 
+class Laser(pygame.sprite.Sprite):
+    speed = -11
+    def __init__(self,x,y):
+        self.image = pygame.image

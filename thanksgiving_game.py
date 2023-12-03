@@ -9,6 +9,8 @@ from bullet import Bullet
 WIDTH, HEIGHT = 800, 600
 tile_size = 64
 
+
+
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -18,6 +20,9 @@ GREEN = (0, 255, 0)
 
 # Initialize Pygame
 pygame.init()
+pygame.font.init() #Initialize the font
+
+custom_font= pygame.font.Font('Brainfish_Rush.ttf', 36)
 
 # Create the screen
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -64,7 +69,7 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
 
     player_score = 0 #Initialize player_score before the loop
     player_lives = 3 #Initialize player_lives
-    
+
     # Images for different fish types
     fish_images = ["fishes/orange_fish1.png", "fishes/green_fish.png", "fishes/yellow_fish.png"]
 
@@ -200,8 +205,8 @@ def display_intro():
         fish_sprites.draw(screen)
 
         #first text box
-        font = pygame.font.Font(None, 48)
-        text = font.render("Click anywhere to start", True, BLACK)
+        #font = pygame.font.Font(None, 48)
+        text = custom_font.render("Click anywhere to start", True, BLACK)
         text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
         screen.blit(text, text_rect)
 
