@@ -131,6 +131,87 @@ def main():
 
     play_game()
 
+# Function to display the introduction screen
+def display_intro():
+    intro = True
+    while intro:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                intro = False  # Exit the introduction loop on mouse click
+
+        screen.fill(WHITE)
+        draw_background(screen)
+        font = pygame.font.Font(None, 48)
+        text = font.render("Click anywhere to start", True, BLACK)
+        text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+        screen.blit(text, text_rect)
+        pygame.display.flip()
+        clock.tick(60)
+
+# ... (previous code remains unchanged)
+
+# Function to save high score to a file
+def save_high_score(score):
+    with open("highscore.txt", "w") as file:
+        file.write(str(score))
+
+# Function to load high score from the file
+def load_high_score():
+    try:
+        with open("highscore.txt", "r") as file:
+            high_score = int(file.read())
+    except FileNotFoundError:
+        high_score = 0
+    return high_score
+
+# Display game over screen including high score
+def display_game_over():
+    global player_score
+    game_over = True
+    high_score = load_high_score()
+
+    if player_score > high_score:
+        high_score = player_score
+        save_high_score(high_score)
+
+    while game_over:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+        screen.fill(WHITE)
+        draw_background(screen)
+        font = pygame.font.Font(None, 36)
+        text = font.render(f"Game Over - High Score: {high_score}", True, BLACK)
+        text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 50))
+        screen.blit(text, text_rect)
+
+        font = pygame.font.Font(None, 24)
+        restart_text = font.render("Click anywhere to restart", True, BLACK)
+        restart_rect = restart_text.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 50))
+        screen.blit(restart_text, restart_rect)
+
+        pygame.display.flip()
+        clock.tick(60)
+
+
+
+# Main function
+def main():
+    global player_score, player_lives
+    player_score = 0
+    player_lives = 3
+
+    display_intro()  # Display introduction screen
+
+    play_game()  # Start the game loop after the introduction
+
 if __name__ == "__main__":
     main()
+
+
 
