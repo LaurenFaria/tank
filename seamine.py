@@ -1,9 +1,7 @@
 import pygame
 import random
-
 WIDTH, HEIGHT = 800, 600
 tile_size = 64
-
 class Seamine(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -43,4 +41,5 @@ def main():
         clock.tick(60)
     pygame.quit()
 if __name__ == "__main__":
+    main()
     main()

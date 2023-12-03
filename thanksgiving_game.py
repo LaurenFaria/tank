@@ -67,8 +67,8 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
     player_fish = PlayerFish()
     all_sprites.add(player_fish)
 
-    player_score = 0 #Initialize player_score before the loop
-    player_lives = 3 #Initialize player_lives
+    player_score = 0  # Initialize player_score before the loop
+    player_lives = 3  # Initialize player_lives
 
     # Images for different fish types
     fish_images = ["fishes/orange_fish1.png", "fishes/green_fish.png", "fishes/yellow_fish.png"]
@@ -79,6 +79,13 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
         image_path = random.choice(fish_images)
         fish = Fishes(image_path, random.randint(1, 2))
         all_sprites.add(fish)
+
+    # Initialize with five sea mines
+    initial_seamine_count = 5
+    for _ in range(initial_seamine_count):
+        seamine = Seamine()
+        all_sprites.add(seamine)
+        sea_mines_group.add(seamine)
 
     # Timer variables for bullet and sea mine creation
     bullet_timer, bullet_frequency = 0, 500
@@ -97,6 +104,22 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
                 all_sprites.empty()
                 bullets_group.empty()
                 sea_mines_group.empty()
+
+        # spawn the sea mines at intervals based on the score
+        if player_score >= 50:
+            seamine_frequency = 1000
+            if player_score % 50 == 0:
+                for _ in range(2):
+                    seamine = Seamine()
+                    all_sprites.add(seamine)
+                    sea_mines_group.add(seamine)
+        if player_score >= 75:
+            seamine_frequency = 1000
+            if player_score % 75 == 0:
+                for _ in range(3):
+                    seamine = Seamine()
+                    all_sprites.add(seamine)
+                    sea_mines_group.add(seamine)
 
         # Update all sprites
         all_sprites.update()
@@ -153,6 +176,7 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
         if seamine_timer >= seamine_frequency:
             seamine = Seamine()
             all_sprites.add(seamine)
+            sea_mines_group.add(seamine)
             seamine_timer = 0
 
         # Draw everything on the screen
@@ -278,13 +302,15 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
+    # Create bullets_group and sea_mines_group
+    bullets_group = pygame.sprite.Group()
+    sea_mines_group = pygame.sprite.Group()
+
 
     #Display the introduction page
     display_intro()
 
-    # Create bullets_group and sea_mines_group
-    bullets_group = pygame.sprite.Group()
-    sea_mines_group = pygame.sprite.Group()
+
 
     player_score = 0
     player_lives = 3
@@ -298,6 +324,8 @@ def main():
 
     # Pass these groups to play_game
     play_game(screen, clock, bullets_group, sea_mines_group)
+
+
 
 
 if __name__ == "__main__":
