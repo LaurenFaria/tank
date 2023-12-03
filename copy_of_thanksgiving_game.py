@@ -1,8 +1,5 @@
 import pygame
 import random
-from fish import PlayerFish
-from seamine import Seamine
-from fishes import Fishes
 
 # Constants
 WIDTH, HEIGHT = 800, 600
@@ -42,10 +39,88 @@ def draw_background(surf):
 
 
 
+# Creating the player fish
+class Fishes(pygame.sprite.Sprite):
+    def __init__(self, image_path, value):
+        super().__init__()
+        self.image = pygame.image.load(image_path).convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.center = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
+        self.velocity = random.uniform(1, 3)
+        self.value = value  # Assign specific values to each type of fish
+
+
+class PlayerFish(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.image.load("fishes/red_fish.png").convert_alpha()
+        self.image.set_colorkey((255,255,255))
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH // 2, HEIGHT // 2)
+        self.speed = 5
+
+    def draw(self, surf):
+        surf.blit(self.image, self.rect)
+
+
+    def update(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            self.rect.x -= self.speed
+        if keys[pygame.K_RIGHT]:
+            self.rect.x += self.speed
+        if keys[pygame.K_UP]:
+            self.rect.y -= self.speed
+        if keys[pygame.K_DOWN]:
+            self.rect.y += self.speed
+
+        # Ensure the player fish stays within the game window
+        self.rect.x = max(0, min(self.rect.x, WIDTH - self.rect.width))
+        self.rect.y = max(0, min(self.rect.y, HEIGHT - self.rect.height))
 
 all_sprites = pygame.sprite.Group()
 
 # Creating the background fish and sea mines
+class Fishes(pygame.sprite.Sprite):
+    def __init__(self, image_path, value):
+        super().__init__()
+        self.image = pygame.image.load(image_path).convert_alpha()
+        self.rect = self.image.get_rect()
+        self.image.set_colorkey((255,255,255))
+        self.rect.center = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
+        self.velocity = random.uniform(1, 3)
+        self.value = value  # Assign specific values to each type of fish
+
+        # Inside the play_game() function where fish objects are created:
+        # Create background fish (example)
+    fish_values = {
+        "fishes/orange_fish1.png": 5,
+        "fishes/green_fish.png": 3,
+        "fishes/yellow_fish.png": 4,
+        }
+    for _ in range(10):
+        image_path = random.choice(list(fish_values.keys()))
+        fish = Fishes(image_path, fish_values[image_path])
+        all_sprites.add(fish)
+
+    def update(self):
+        self.rect.x += self.velocity
+        if self.rect.left > WIDTH:
+            self.rect.right = 0
+
+
+#define the seamine class
+class Seamine(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.image.load("assets/sprites/seamine.png").convert_alpha()
+        self.image.set_colorkey((255,255,255))
+        self.rect = self.image.get_rect()
+        self.rect.center = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
+
+    # Update method to keep the sea mines stationary
+    def update(self):
+        pass  # No update logic for the sea mines; they remain stationary
 
 # Main game function
 def play_game():
