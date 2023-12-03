@@ -1,23 +1,20 @@
 import pygame
-
+from seamine import Seamine
 WIDTH, HEIGHT = 800, 600
-tile_size = 64
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.Surface((5, 5))
-        self.image.fill((255, 0, 0))
+        self.image = pygame.Surface((10, 5))  # Adjust size as needed
+        self.image.fill((255, 0, 0))  # Red bullet
         self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
-        self.speed = 10  # Bullet speed
-        self.direction = pygame.mouse.get_pos()  # Get mouse position
+        self.rect.x = x
+        self.rect.y = y
+        self.speed = 8  # Adjust bullet speed as needed
 
     def update(self):
-        # Move the bullet towards the mouse position
-        self.rect.x += (self.direction[0] - self.rect.x) * self.speed
-        self.rect.y += (self.direction[1] - self.rect.y) * self.speed
-
-        # Remove the bullet when it goes off-screen
-        if not pygame.Rect(0, 0, WIDTH, HEIGHT).colliderect(self.rect):
+        self.rect.x += self.speed  # Move bullet horizontally
+        if self.rect.x > WIDTH:  # If bullet goes off-screen, remove it
             self.kill()
+
+

@@ -1,5 +1,9 @@
 import pygame
 import random
+from fish import PlayerFish
+from seamine import Seamine
+from fishes import Fishes
+from bullet import Bullet
 
 # Constants
 WIDTH, HEIGHT = 800, 600
@@ -39,109 +43,31 @@ def draw_background(surf):
 
 
 
-# Creating the player fish
-class Fishes(pygame.sprite.Sprite):
-    def __init__(self, image_path, value):
-        super().__init__()
-        self.image = pygame.image.load(image_path).convert_alpha()
-        self.rect = self.image.get_rect()
-        self.rect.center = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
-        self.velocity = random.uniform(1, 3)
-        self.value = value  # Assign specific values to each type of fish
-
-
-class PlayerFish(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.image = pygame.image.load("fishes/red_fish.png").convert_alpha()
-        self.image.set_colorkey((255,255,255))
-        self.rect = self.image.get_rect()
-        self.rect.center = (WIDTH // 2, HEIGHT // 2)
-        self.speed = 5
-
-    def draw(self, surf):
-        surf.blit(self.image, self.rect)
-
-
-    def update(self):
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            self.rect.x -= self.speed
-        if keys[pygame.K_RIGHT]:
-            self.rect.x += self.speed
-        if keys[pygame.K_UP]:
-            self.rect.y -= self.speed
-        if keys[pygame.K_DOWN]:
-            self.rect.y += self.speed
-
-        # Ensure the player fish stays within the game window
-        self.rect.x = max(0, min(self.rect.x, WIDTH - self.rect.width))
-        self.rect.y = max(0, min(self.rect.y, HEIGHT - self.rect.height))
 
 all_sprites = pygame.sprite.Group()
 
-# Creating the background fish and sea mines
-class Fishes(pygame.sprite.Sprite):
-    def __init__(self, image_path, value):
-        super().__init__()
-        self.image = pygame.image.load(image_path).convert_alpha()
-        self.rect = self.image.get_rect()
-        self.image.set_colorkey((255,255,255))
-        self.rect.center = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
-        self.velocity = random.uniform(1, 3)
-        self.value = value  # Assign specific values to each type of fish
 
-        # Inside the play_game() function where fish objects are created:
-        # Create background fish (example)
-    fish_values = {
-        "fishes/orange_fish1.png": 5,
-        "fishes/green_fish.png": 3,
-        "fishes/yellow_fish.png": 4,
-        }
-    for _ in range(10):
-        image_path = random.choice(list(fish_values.keys()))
-        fish = Fishes(image_path, fish_values[image_path])
-        all_sprites.add(fish)
-
-    def update(self):
-        self.rect.x += self.velocity
-        if self.rect.left > WIDTH:
-            self.rect.right = 0
-
-
-#define the seamine class
-class Seamine(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.image = pygame.image.load("assets/sprites/seamine.png").convert_alpha()
-        self.image.set_colorkey((255,255,255))
-        self.rect = self.image.get_rect()
-        self.rect.center = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
-
-    # Update method to keep the sea mines stationary
-    def update(self):
-        pass  # No update logic for the sea mines; they remain stationary
 
 # Main game function
-def play_game():
-    global player_score, player_lives
+def play_game(screen, clock, bullets_group, sea_mines_group):
+    global player_score, player_lives, all_sprites
 
+    all_sprites = pygame.sprite.Group()
     player_fish = PlayerFish()
-    player_fish.draw(screen)
-    #all_sprites.add(player_fish)  # Add player fish to the sprite group
+    all_sprites.add(player_fish)
+    fish_images = ["fishes/orange_fish1.png", "fishes/green_fish.png", "fishes/yellow_fish.png"]
 
-    # Create background fish (example)
-    for _ in range(10):
+    initial_fish_count = 15
+    for _ in range(initial_fish_count):
         image_path = random.choice(["fishes/orange_fish1.png", "fishes/green_fish.png", "fishes/yellow_fish.png"])
         fish = Fishes(image_path, random.randint(1, 2))
         all_sprites.add(fish)
 
-    # Create sea mines
-    for _ in range(5):
-        seamine = Seamine()
-        all_sprites.add(seamine)
+    bullet_timer = 0
+    bullet_frequency = 500
 
-
+    seamine_timer = 0
+    seamine_frequency = 1000
 
     while True:
         for event in pygame.event.get():
@@ -149,28 +75,55 @@ def play_game():
                 pygame.quit()
                 quit()
 
-        # Update player fish position based on arrow key presses
         all_sprites.update()
 
-        # Collision detection
+        bullet_seamine_collisions = pygame.sprite.groupcollide(bullets_group, sea_mines_group, True, False)
+
+        for seamine, bullets in bullet_seamine_collisions.items():
+            if len(bullets) >= 5:
+                seamine.kill()
+
         collisions = pygame.sprite.spritecollide(player_fish, all_sprites, True)
         for collided_fish in collisions:
             if isinstance(collided_fish, Fishes):
                 player_score += collided_fish.value
+                # Add a new fish after collision
+                image_path = random.choice(fish_images)
+                fish = Fishes(image_path, random.randint(1,2))
+                fish.rect.x = -fish.rect.width #off-screen on the left side
+                fish.rect.y = random.randint(0, HEIGHT -fish.rect.height) #random Y position
+                all_sprites.add(fish)
             elif isinstance(collided_fish, Seamine):
                 player_lives -= 1
                 if player_lives <= 0:
                     display_game_over()
 
+        hits = pygame.sprite.groupcollide(all_sprites, all_sprites, False, False)
+        for hit in hits:
+            for target in hits[hit]:
+                if isinstance(hit, Fishes) and isinstance(target, Bullet):
+                    player_score += hit.value
+                    hit.kill()
+                    target.kill()
 
+        bullet_timer += clock.get_rawtime()
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE] and bullet_timer >= bullet_frequency:
+            player_fish.shoot()
+            bullet_timer = 0
 
+        seamine_timer += clock.get_rawtime()
+        if seamine_timer >= seamine_frequency:
+            seamine = Seamine()
+            all_sprites.add(seamine)
+            seamine_timer = 0
 
-        # Draw the game elements
         screen.fill(WHITE)
         draw_background(screen)
-        all_sprites.draw(screen)  # Draw all sprites, including the player fish
+        all_sprites.draw(screen)
+        player_fish.draw(screen)
+        player_fish.update()
 
-        # Update the player's score and lives on the screen
         font = pygame.font.Font(None, 36)
         text = font.render(f"Score: {player_score} Lives: {player_lives}", True, BLACK)
         text_rect = text.get_rect()
@@ -180,9 +133,53 @@ def play_game():
         pygame.display.flip()
         clock.tick(60)
 
-# Display game over screen
+
+# Function to display the introduction screen
+def display_intro():
+    intro = True
+    while intro:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                intro = False  # Exit the introduction loop on mouse click
+
+        screen.fill(WHITE)
+        draw_background(screen)
+        font = pygame.font.Font(None, 48)
+        text = font.render("Click anywhere to start", True, BLACK)
+        text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+        screen.blit(text, text_rect)
+        pygame.display.flip()
+        clock.tick(60)
+
+# ... (previous code remains unchanged)
+
+# Function to save high score to a file
+def save_high_score(score):
+    with open("highscore.txt", "w") as file:
+        file.write(str(score))
+
+# Function to load high score from the file
+def load_high_score():
+    try:
+        with open("highscore.txt", "r") as file:
+            high_score = int(file.read())
+    except FileNotFoundError:
+        high_score = 0
+    return high_score
+
+# Display game over screen including high score
 def display_game_over():
+    global player_score
     game_over = True
+    high_score = load_high_score()
+
+    if player_score > high_score:
+        high_score = player_score
+        save_high_score(high_score)
+
     while game_over:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -191,21 +188,53 @@ def display_game_over():
 
         screen.fill(WHITE)
         draw_background(screen)
-        font = pygame.font.Font(None, 48)
-        text = font.render("Game Over", True, BLACK)
-        text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+        font = pygame.font.Font(None, 36)
+        text = font.render(f"Game Over - High Score: {high_score}", True, BLACK)
+        text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 50))
         screen.blit(text, text_rect)
+
+        font = pygame.font.Font(None, 24)
+        restart_text = font.render("Click anywhere to restart", True, BLACK)
+        restart_rect = restart_text.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 50))
+        screen.blit(restart_text, restart_rect)
+
         pygame.display.flip()
         clock.tick(60)
+
+
 
 # Main function
 def main():
     global player_score, player_lives
+
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    clock = pygame.time.Clock()
+
+    # Create bullets_group and sea_mines_group
+    bullets_group = pygame.sprite.Group()
+    sea_mines_group = pygame.sprite.Group()
+
     player_score = 0
     player_lives = 3
 
-    play_game()
+    # Create initial sea mines and add them to sea_mines_group
+    initial_seamine_count = 5
+    for _ in range(initial_seamine_count):
+        seamine = Seamine()
+        all_sprites.add(seamine)
+        sea_mines_group.add(seamine)
+
+    # Pass these groups to play_game
+    play_game(screen, clock, bullets_group, sea_mines_group)
+
 
 if __name__ == "__main__":
+    pygame.init()
     main()
+
+
+
+
+
 

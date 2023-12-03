@@ -46,33 +46,28 @@ def draw_background(surf):
 
 all_sprites = pygame.sprite.Group()
 
-# Creating the background fish and sea mines
+
+#adding the colliding sound
+collision_sound = pygame.mixer.Sound("hurt.wav")
+
 
 # Main game function
+def play_game(screen, clock, bullets_group, sea_mines_group):
+    global player_score, player_lives, all_sprites
 
-
-
-def play_game():
-    global player_score, player_lives
-
+    all_sprites = pygame.sprite.Group()
     player_fish = PlayerFish()
-    player_fish.draw(screen)
     all_sprites.add(player_fish)
+    fish_images = ["fishes/orange_fish1.png", "fishes/green_fish.png", "fishes/yellow_fish.png"]
 
-
-    initial_fish_count = 10
+    initial_fish_count = 15
     for _ in range(initial_fish_count):
         image_path = random.choice(["fishes/orange_fish1.png", "fishes/green_fish.png", "fishes/yellow_fish.png"])
         fish = Fishes(image_path, random.randint(1, 2))
         all_sprites.add(fish)
 
-    fish_respawn_timer = 0
-    fish_respawn_frequency = 5000
-
-    initial_seamine_count = 5
-    for _ in range(initial_seamine_count):
-        seamine = Seamine()
-        all_sprites.add(seamine)
+    bullet_timer = 0
+    bullet_frequency = 500
 
     seamine_timer = 0
     seamine_frequency = 1000
@@ -82,49 +77,67 @@ def play_game():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
+            elif event.type == pygame.MOUSEBUTTONDOWN and player_lives <= 0:
+                #reset the game on mouse click if lives are zero
+                player_lives = 3
+                player_score = 0
+                all_sprites.empty()
+                bullets_group.empty()
+                sea_mines_group.empty()
 
         all_sprites.update()
-        #check to see if all fish have been eaten then respawn 
-        if len(all_sprites.sprites()) <= initial_fish_count:
-            fish_respawn_timer += clock.get_rawtime()
-            if fish_respawn_timer >= fish_respawn_frequency:
-                image_path = random.choice(
-                    ["fishes/orange_fish1.png", "fishes/green_fish.png", "fishes/yellow_fish.png"])
-                fish = Fishes(image_path, random.randint(1, 2))
+
+        bullet_seamine_collisions = pygame.sprite.groupcollide(bullets_group, sea_mines_group, True, False)
+
+        for seamine, bullets in bullet_seamine_collisions.items():
+            if len(bullets) >= 5:
+                seamine.kill()
+
+        collisions = pygame.sprite.spritecollide(player_fish, all_sprites, True)
+        for collided_fish in collisions:
+            if isinstance(collided_fish, Fishes):
+                #handels the scoring or other actions when the fish collide
+                player_score += collided_fish.value
+                # Add a new fish after collision
+                image_path = random.choice(fish_images)
+                fish = Fishes(image_path, random.randint(1,2))
+                fish.rect.x = -fish.rect.width #off-screen on the left side
+                fish.rect.y = random.randint(0, HEIGHT -fish.rect.height) #random Y position
                 all_sprites.add(fish)
-                fish_respawn_timer = 0
+            elif isinstance(collided_fish, Seamine):
+                player_lives -= 1
+                if player_lives <= 0:
+                    display_game_over(bullets_group, sea_mines_group)
+                else:
+                    #play the collsion sound
+                    collision_sound.play()
+
+        hits = pygame.sprite.groupcollide(all_sprites, all_sprites, False, False)
+        for hit in hits:
+            for target in hits[hit]:
+                if isinstance(hit, Fishes) and isinstance(target, Bullet):
+                    player_score += hit.value
+                    hit.kill()
+                    target.kill()
+
+        bullet_timer += clock.get_rawtime()
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE] and bullet_timer >= bullet_frequency:
+            player_fish.shoot()
+            bullet_timer = 0
 
         seamine_timer += clock.get_rawtime()
-
         if seamine_timer >= seamine_frequency:
             seamine = Seamine()
             all_sprites.add(seamine)
             seamine_timer = 0
 
-
-        # Update player fish position based on arrow key presses
-        all_sprites.update()
-
-        # Collision detection
-        collisions = pygame.sprite.spritecollide(player_fish, all_sprites, True)
-        for collided_fish in collisions:
-            if isinstance(collided_fish, Fishes):
-                player_score += collided_fish.value
-            elif isinstance(collided_fish, Seamine):
-                player_lives -= 1
-                if player_lives <= 0:
-                    display_game_over()
-
-
-
-
-        # Draw the game elements
         screen.fill(WHITE)
         draw_background(screen)
-        all_sprites.draw(screen)  # Draw all sprites, including the player fish
+        all_sprites.draw(screen)
         player_fish.draw(screen)
         player_fish.update()
-        # Update the player's score and lives on the screen
+
         font = pygame.font.Font(None, 36)
         text = font.render(f"Score: {player_score} Lives: {player_lives}", True, BLACK)
         text_rect = text.get_rect()
@@ -135,17 +148,20 @@ def play_game():
         clock.tick(60)
 
 
-# Main function
-def main():
-    global player_score, player_lives
-    player_score = 0
-    player_lives = 3
-
-    play_game()
-
 # Function to display the introduction screen
 def display_intro():
+
+
     intro = True
+    fish_sprites = pygame.sprite.Group() #create a sprite group for the fish
+
+    for _ in range(20):
+        image_path = random.choice(["fishes/orange_fish1.png", "fishes/green_fish.png", "fishes/yellow_fish.png"])
+        fish = Fishes(image_path, random.randint(1,2))
+        fish.rect.x = random.randint(0, WIDTH - fish.rect.width)
+        fish.rect.y = random.randint(0, HEIGHT - fish.rect.height)
+        fish_sprites.add(fish)
+
     while intro:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -156,10 +172,22 @@ def display_intro():
 
         screen.fill(WHITE)
         draw_background(screen)
+
+        #draw the fish sprites on the screen
+        fish_sprites.draw(screen)
+
+        #first text box
         font = pygame.font.Font(None, 48)
         text = font.render("Click anywhere to start", True, BLACK)
         text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
         screen.blit(text, text_rect)
+
+        #second text box
+        font = pygame.font.Font(None, 20)
+        additional_text = font.render("Objective: Eat as many fish a possible without running into the sea mines that will randomly appear.", True, BLACK)
+        additional_text_rect = additional_text.get_rect(center=(WIDTH/2, HEIGHT/2 + 50))
+        screen.blit(additional_text, additional_text_rect)
+
         pygame.display.flip()
         clock.tick(60)
 
@@ -179,8 +207,11 @@ def load_high_score():
         high_score = 0
     return high_score
 
+
+# putting the sound in
+game_over_sound = pygame.mixer.Sound("game-over.wav")
 # Display game over screen including high score
-def display_game_over():
+def display_game_over(bullets_group, sea_mines_group):
     global player_score
     game_over = True
     high_score = load_high_score()
@@ -188,6 +219,9 @@ def display_game_over():
     if player_score > high_score:
         high_score = player_score
         save_high_score(high_score)
+
+    #play the game over sound
+    game_over_sound.play()
 
     while game_over:
         for event in pygame.event.get():
@@ -202,28 +236,48 @@ def display_game_over():
         text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 50))
         screen.blit(text, text_rect)
 
-        font = pygame.font.Font(None, 24)
-        restart_text = font.render("Click anywhere to restart", True, BLACK)
-        restart_rect = restart_text.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 50))
-        screen.blit(restart_text, restart_rect)
-
         pygame.display.flip()
         clock.tick(60)
 
+# Declare all_sprites as a global variable
+all_sprites = pygame.sprite.Group()
 
 
 # Main function
 def main():
     global player_score, player_lives
+
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    clock = pygame.time.Clock()
+
+    #Display the introduction page
+    display_intro()
+
+    # Create bullets_group and sea_mines_group
+    bullets_group = pygame.sprite.Group()
+    sea_mines_group = pygame.sprite.Group()
+
     player_score = 0
     player_lives = 3
 
-    display_intro()  # Display introduction screen
+    # Create initial sea mines and add them to sea_mines_group
+    initial_seamine_count = 5
+    for _ in range(initial_seamine_count):
+        seamine = Seamine()
+        all_sprites.add(seamine)
+        sea_mines_group.add(seamine)
 
-    play_game()  # Start the game loop after the introduction
+    # Pass these groups to play_game
+    play_game(screen, clock, bullets_group, sea_mines_group)
+
 
 if __name__ == "__main__":
+    pygame.init()
     main()
+
+
+
 
 
 
