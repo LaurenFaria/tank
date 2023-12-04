@@ -70,6 +70,13 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
     player_score = 0  # Initialize player_score before the loop
     player_lives = 3  # Initialize player_lives
 
+    if player_score >= 20:
+        player_fish.size_multiplier = 50 # Increase the size multiplier
+    elif player_score >= 50:
+        player_fish.size_multiplier = 2.0 # Further increase the size multiplier
+
+    player_fish.update(player_score)
+
     # Images for different fish types
     fish_images = ["fishes/orange_fish1.png", "fishes/green_fish.png", "fishes/yellow_fish.png"]
 
@@ -296,21 +303,19 @@ all_sprites = pygame.sprite.Group()
 
 
 # Main function
+# Main function to start the game
 def main():
     global player_score, player_lives
-
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
+
     # Create bullets_group and sea_mines_group
     bullets_group = pygame.sprite.Group()
     sea_mines_group = pygame.sprite.Group()
 
-
     #Display the introduction page
     display_intro()
-
-
 
     player_score = 0
     player_lives = 3
@@ -325,13 +330,10 @@ def main():
     # Pass these groups to play_game
     play_game(screen, clock, bullets_group, sea_mines_group)
 
-
-
-
+# Run the main function
 if __name__ == "__main__":
     pygame.init()
     main()
-
 
 
 

@@ -9,19 +9,32 @@ class PlayerFish(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         # Load the fish image and set its initial properties
-        original_image = pygame.image.load("fishes/red_fish.png").convert_alpha()
-        original_image.set_colorkey((255, 255, 255))  # Set transparent color
-        self.image = original_image.copy()  # Create a copy to maintain the original for flipping
+        self.image = pygame.image.load("fishes/red_fish.png").convert_alpha()
+        self.image.set_colorkey((255, 255, 255))
+        self.original_image = self.image.copy()  # Create a copy to maintain the original for flipping
         self.rect = self.image.get_rect()
         self.rect.center = (WIDTH // 2, HEIGHT // 2)  # Initial position
         self.speed = 5  # Movement speed
         self.bullet_speed = 8  # Bullet speed
         self.bullets = pygame.sprite.Group()  # Group to manage bullets
         self.direction = "left"  # Initially facing left
+        self.base_size = self.rect.size #base size of the fish
 
-    def update(self):
+
+        self.size_multiplier = 1 #size multipluer based on the score
+
+    def update(self, player_score = 0):
+        # Update the size of the fish based on the size multiplier and player's score
+        self.size_multiplier = 1.0 + (player_score / 100)  # Adjust this ratio as needed
+        new_width = int(self.original_image.get_width() * self.size_multiplier)
+        new_height = int(self.original_image.get_height() * self.size_multiplier)
+        self.image = pygame.transform.scale(self.original_image, (new_width, new_height))
+        self.rect = self.image.get_rect(center=self.rect.center)
+
         # Get the pressed keys
         keys = pygame.key.get_pressed()
+
+
 
         # Move the fish left, right, up, and down
         if keys[pygame.K_LEFT]:
@@ -58,3 +71,4 @@ class PlayerFish(pygame.sprite.Sprite):
     def shoot(self):
         bullet = Bullet(self.rect.right, self.rect.centery)  # Create a bullet
         self.bullets.add(bullet)  # Add bullet to bullets group
+
