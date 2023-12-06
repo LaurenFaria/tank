@@ -60,27 +60,16 @@ pygame.mixer.music.play(-1)
 
 # Main game function
 def play_game(screen, clock, bullets_group, sea_mines_group):
-    # Create a group to manage all sprites in the game
-
-
-    # Create and add the player fish to the sprite group
+    # Initialize necessary variables
     player_fish = PlayerFish()
     fishes_group = pygame.sprite.Group()
     bullets_group = pygame.sprite.Group()
     sea_mines_group = pygame.sprite.Group()
-
-    player_score = 0  # Initialize player_score before the loop
-    player_lives = 3  # Initialize player_lives
-
-    if player_score >= 20:
-        player_fish.size_multiplier = 50 # Increase the size multiplier
-    elif player_score >= 50:
-        player_fish.size_multiplier = 2.0 # Further increase the size multiplier
-
-    player_fish.update(player_score)
-
-    # Images for different fish types
+    player_score = 0
+    player_lives = 3
     fish_images = ["fishes/orange_fish1.png", "fishes/green_fish.png", "fishes/yellow_fish.png"]
+    bullet_timer, bullet_frequency = 0, 500
+    seamine_timer, seamine_frequency = 0, 1000
 
     # Generate initial fish objects and add them to the sprite group
     initial_fish_count = 15
@@ -95,9 +84,6 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
         seamine = Seamine()
         sea_mines_group.add(seamine)
 
-    # Timer variables for bullet and sea mine creation
-    bullet_timer, bullet_frequency = 0, 500
-    seamine_timer, seamine_frequency = 0, 1000
 
     while True:
         # Event handling
@@ -131,12 +117,6 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
         bullets_group.update()
         sea_mines_group.update()
 
-        # Handle collisions between bullets and sea mines
-        bullet_seamine_collisions = pygame.sprite.groupcollide(bullets_group, sea_mines_group, True, True)
-        for seamine, bullets in bullet_seamine_collisions.items():
-            for bullet in bullets:
-                bullet.kill()
-                seamine.kill()
 
         # Check collisions between player fish and other sprites
         fish_collisions = pygame.sprite.spritecollide(player_fish, fishes_group, dokill=True)
@@ -157,20 +137,13 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
                 else:
                     collision_sound.play()
 
+        # Handle collisions between bullets and sea mines
+        bullet_seamine_collisions = pygame.sprite.groupcollide(bullets_group, sea_mines_group, True, True)
+        for seamine, bullets in bullet_seamine_collisions.items():
+            for bullet in bullets:
+                bullet.kill()
+                seamine.kill()
 
-        # Check collisions between sea mines and fish bullets
-        seamine_bullet_collisions = pygame.sprite.groupcollide(sea_mines_group, bullets_group, True, True)
-        for seamine in seamine_bullet_collisions:
-            seamine.kill()
-
-        # Handle other sprite collisions (e.g., between fishes and bullets)
-        hits = pygame.sprite.groupcollide(fishes_group, sea_mines_group, False, False)
-        for hit in hits:
-            for target in hits[hit]:
-                if isinstance(hit, Fishes) and isinstance(target, Bullet):
-                    player_score += hit.value
-                    hit.kill()
-                    target.kill()
 
         # Handle bullet shooting from the player fish
         bullet_timer += clock.get_rawtime()
@@ -207,15 +180,13 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
         clock.tick(60)
 
 
-
-
 # Function to display the introduction screen
 def display_intro():
-
 
     intro = True
     fish_sprites = pygame.sprite.Group() #create a sprite group for the fish
 
+    #blit 20 fish onto the screen
     for _ in range(20):
         image_path = random.choice(["fishes/orange_fish1.png", "fishes/green_fish.png", "fishes/yellow_fish.png"])
         fish = Fishes(image_path, random.randint(1,2))
@@ -238,7 +209,6 @@ def display_intro():
         fish_sprites.draw(screen)
 
         #first text box
-        #font = pygame.font.Font(None, 48)
         text = custom_font.render("Click anywhere to start", True, BLACK)
         text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
         screen.blit(text, text_rect)
@@ -252,22 +222,19 @@ def display_intro():
         pygame.display.flip()
         clock.tick(60)
 
-# ... (previous code remains unchanged)
-
 # Function to save high score to a file
 def save_high_score(score):
     with open("highscore.txt", "w") as file:
-        file.write(str(score))
+        file.write(str(score)) #recording the top score and writing it into a file
 
 # Function to load high score from the file
 def load_high_score():
     try:
-        with open("highscore.txt", "r") as file:
+        with open("highscore.txt", "r") as file: #reading the high score from the file
             high_score = int(file.read())
     except FileNotFoundError:
         high_score = 0
     return high_score
-
 
 # putting the sound in
 game_over_sound = pygame.mixer.Sound("game-over.wav")
