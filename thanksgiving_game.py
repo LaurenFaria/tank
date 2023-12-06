@@ -1,15 +1,13 @@
 import pygame
 import random
 from fish import PlayerFish
-from seamine import Seamine
+from seamine import Seamine, Bullet
 from fishes import Fishes
 from bullet import Bullet
 
 # Constants
 WIDTH, HEIGHT = 800, 600
 tile_size = 64
-
-
 
 # Colors
 WHITE = (255, 255, 255)
@@ -45,11 +43,6 @@ def draw_background(surf):
     # Draw the sandy bottom
     for x in range(0, WIDTH, tile_size):
         surf.blit(sand, (x, HEIGHT - tile_size))
-
-
-
-
-
 
 
 #adding the colliding sound
@@ -112,11 +105,18 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
                     seamine = Seamine()
                     sea_mines_group.add(seamine)
 
+
+
         # Update all sprites
         fishes_group.update()
         bullets_group.update()
         sea_mines_group.update()
 
+        # Inside the main game loop where you update the bullets and seamines
+        bullet_seamine_collisions = pygame.sprite.groupcollide(bullets_group, sea_mines_group, True, True)
+        for bullet, seamine_list in bullet_seamine_collisions.items():
+            for seamine in seamine_list:
+                seamine.kill()
 
         # Check collisions between player fish and other sprites
         fish_collisions = pygame.sprite.spritecollide(player_fish, fishes_group, dokill=True)
@@ -137,20 +137,6 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
                 else:
                     collision_sound.play()
 
-        # Handle collisions between bullets and sea mines
-        bullet_seamine_collisions = pygame.sprite.groupcollide(bullets_group, sea_mines_group, True, True)
-        for seamine, bullets in bullet_seamine_collisions.items():
-            for bullet in bullets:
-                bullet.kill()
-                seamine.kill()
-
-
-        # Handle bullet shooting from the player fish
-        bullet_timer += clock.get_rawtime()
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_SPACE] and bullet_timer >= bullet_frequency:
-            player_fish.shoot()
-            bullet_timer = 0
 
         # Spawn sea mines at intervals
         seamine_timer += clock.get_rawtime()
@@ -295,6 +281,6 @@ def main():
     play_game(screen, clock, bullets_group, sea_mines_group)
 
 # Run the main function
-if __name__ == "__main__":
+if __name__ == "__main__":  #function found off the internet, bit it allows you to initialize the game as well as run the main function
     pygame.init()
     main()
