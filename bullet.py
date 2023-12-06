@@ -19,12 +19,9 @@ class Bullet(pygame.sprite.Sprite):
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
-bullets = pygame.sprite.Group()  # Create a group to hold bullets
+bullets_group = pygame.sprite.Group()  # Create a group to hold bullets
 sea_mines_group = pygame.sprite.Group()
 
 def shoot(player):
     new_bullet = Bullet(player.rect.right, player.rect.centery)
-    bullets.add(new_bullet)
-
-
-
+    bullets_group.add(new_bullet)

@@ -49,7 +49,7 @@ def draw_background(surf):
 
 
 
-all_sprites = pygame.sprite.Group()
+
 
 
 #adding the colliding sound
@@ -61,11 +61,13 @@ pygame.mixer.music.play(-1)
 # Main game function
 def play_game(screen, clock, bullets_group, sea_mines_group):
     # Create a group to manage all sprites in the game
-    all_sprites = pygame.sprite.Group()
+
 
     # Create and add the player fish to the sprite group
     player_fish = PlayerFish()
-    all_sprites.add(player_fish)
+    fishes_group = pygame.sprite.Group()
+    bullets_group = pygame.sprite.Group()
+    sea_mines_group = pygame.sprite.Group()
 
     player_score = 0  # Initialize player_score before the loop
     player_lives = 3  # Initialize player_lives
@@ -85,13 +87,12 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
     for _ in range(initial_fish_count):
         image_path = random.choice(fish_images)
         fish = Fishes(image_path, random.randint(1, 2))
-        all_sprites.add(fish)
+        fishes_group.add(fish)
 
     # Initialize with five sea mines
     initial_seamine_count = 5
     for _ in range(initial_seamine_count):
         seamine = Seamine()
-        all_sprites.add(seamine)
         sea_mines_group.add(seamine)
 
     # Timer variables for bullet and sea mine creation
@@ -108,7 +109,6 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
                 # Reset the game on mouse click if lives are zero
                 player_lives = 3
                 player_score = 0
-                all_sprites.empty()
                 bullets_group.empty()
                 sea_mines_group.empty()
 
@@ -118,18 +118,18 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
             if player_score % 50 == 0:
                 for _ in range(2):
                     seamine = Seamine()
-                    all_sprites.add(seamine)
                     sea_mines_group.add(seamine)
         if player_score >= 75:
             seamine_frequency = 1000
             if player_score % 75 == 0:
                 for _ in range(3):
                     seamine = Seamine()
-                    all_sprites.add(seamine)
                     sea_mines_group.add(seamine)
 
         # Update all sprites
-        all_sprites.update()
+        fishes_group.update()
+        bullets_group.update()
+        sea_mines_group.update()
 
         # Handle collisions between bullets and sea mines
         bullet_seamine_collisions = pygame.sprite.groupcollide(bullets_group, sea_mines_group, True, True)
@@ -139,23 +139,24 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
                 seamine.kill()
 
         # Check collisions between player fish and other sprites
-        collisions = pygame.sprite.spritecollide(player_fish, all_sprites, True)
-        for collided_fish in collisions:
-            if isinstance(collided_fish, Fishes):
-                # Handle fish collisions
-                player_score += collided_fish.value
-                image_path = random.choice(fish_images)
-                fish = Fishes(image_path, random.randint(1, 2))
-                fish.rect.x = -fish.rect.width
-                fish.rect.y = random.randint(0, HEIGHT - fish.rect.height)
-                all_sprites.add(fish)
-            elif isinstance(collided_fish, Seamine):
-                # Handle seamine collisions
+        fish_collisions = pygame.sprite.spritecollide(player_fish, fishes_group, dokill=True)
+        for collided_fish in fish_collisions:
+            player_score += collided_fish.value
+            image_path = random.choice(fish_images)
+            new_fish = Fishes(image_path, random.randint(1, 2))
+            new_fish.rect.x = -new_fish.rect.width
+            new_fish.rect.y = random.randint(0, HEIGHT - new_fish.rect.height)
+            fishes_group.add(new_fish)
+
+            #check collisions between player fish and sea mine sprites
+            seamine_collisions = pygame.sprite.spritecollide(player_fish, sea_mines_group, dokill=True)
+            for collided_seamine in seamine_collisions:
                 player_lives -= 1
                 if player_lives <= 0:
                     display_game_over(bullets_group, sea_mines_group)
                 else:
                     collision_sound.play()
+
 
         # Check collisions between sea mines and fish bullets
         seamine_bullet_collisions = pygame.sprite.groupcollide(sea_mines_group, bullets_group, True, True)
@@ -163,7 +164,7 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
             seamine.kill()
 
         # Handle other sprite collisions (e.g., between fishes and bullets)
-        hits = pygame.sprite.groupcollide(all_sprites, all_sprites, False, False)
+        hits = pygame.sprite.groupcollide(fishes_group, sea_mines_group, False, False)
         for hit in hits:
             for target in hits[hit]:
                 if isinstance(hit, Fishes) and isinstance(target, Bullet):
@@ -182,15 +183,16 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
         seamine_timer += clock.get_rawtime()
         if seamine_timer >= seamine_frequency:
             seamine = Seamine()
-            all_sprites.add(seamine)
             sea_mines_group.add(seamine)
             seamine_timer = 0
 
         # Draw everything on the screen
         screen.fill(WHITE)
         draw_background(screen)
-        all_sprites.draw(screen)
+        fishes_group.draw(screen)
         player_fish.draw(screen)
+        bullets_group.draw(screen)
+        sea_mines_group.draw(screen)
         player_fish.update()
 
         # Display player score and lives
@@ -298,11 +300,7 @@ def display_game_over(bullets_group, sea_mines_group):
         pygame.display.flip()
         clock.tick(60)
 
-# Declare all_sprites as a global variable
-all_sprites = pygame.sprite.Group()
 
-
-# Main function
 # Main function to start the game
 def main():
     global player_score, player_lives
@@ -324,7 +322,6 @@ def main():
     initial_seamine_count = 5
     for _ in range(initial_seamine_count):
         seamine = Seamine()
-        all_sprites.add(seamine)
         sea_mines_group.add(seamine)
 
     # Pass these groups to play_game
@@ -334,8 +331,3 @@ def main():
 if __name__ == "__main__":
     pygame.init()
     main()
-
-
-
-
-

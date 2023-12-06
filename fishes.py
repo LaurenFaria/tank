@@ -5,7 +5,11 @@ WIDTH, HEIGHT = 800, 600
 tile_size = 64
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))  # Set the display mode
-all_sprites = pygame.sprite.Group()
+
+#initilize the fishes group
+fishes_group = pygame.sprite.Group()
+bullets_group= pygame.sprite.Group()
+
 class Fishes(pygame.sprite.Sprite):
     fish_values = {
         "fishes/orange_fish1.png": 5,
@@ -42,6 +46,5 @@ fish_values = {
 for _ in range(10):
     image_path = random.choice(list(fish_values.keys()))
     fish = Fishes(image_path, fish_values[image_path])
-    all_sprites.add(fish)
-
+    fishes_group.add(fish)
 

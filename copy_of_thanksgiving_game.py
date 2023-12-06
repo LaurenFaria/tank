@@ -222,7 +222,7 @@ def main():
     initial_seamine_count = 5
     for _ in range(initial_seamine_count):
         seamine = Seamine()
-        all_sprites.add(seamine)
+        sea_mines_group.add(seamine)
         sea_mines_group.add(seamine)
 
     # Pass these groups to play_game

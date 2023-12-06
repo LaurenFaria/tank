@@ -71,4 +71,3 @@ class PlayerFish(pygame.sprite.Sprite):
     def shoot(self):
         bullet = Bullet(self.rect.right, self.rect.centery)  # Create a bullet
         self.bullets.add(bullet)  # Add bullet to bullets group
-
