@@ -61,7 +61,7 @@ def play_game(screen, clock, bullets_group, sea_mines_group):
     player_score = 0
     player_lives = 3
     fish_images = ["fishes/orange_fish1.png", "fishes/green_fish.png", "fishes/yellow_fish.png"]
-    bullet_timer, bullet_frequency = 0, 500
+    #bullet_timer, bullet_frequency = 0, 500
     seamine_timer, seamine_frequency = 0, 1000
 
     # Generate initial fish objects and add them to the sprite group
@@ -282,5 +282,5 @@ def main():
 
 # Run the main function
 if __name__ == "__main__":  #function found off the internet, bit it allows you to initialize the game as well as run the main function
-    pygame.init()
+    pygame.init() # the name is set on how the variable is being used , so __name__ is set to main() once it runs
     main()

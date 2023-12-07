@@ -26,8 +26,8 @@ class Fishes(pygame.sprite.Sprite):
         self.rect.center = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
         self.velocity = random.uniform(1, 3)
         self.value = value  # Assign specific values to each type of fish
-    @classmethod
-    def create_background_fish(cls, all_sprites):
+    @classmethod #this makes reference to the class above and pulls it down
+    def create_background_fish(cls, all_sprites): #cls is reference to the class above
         for _ in range(15):
             image_path = random.choice(list(cls.fish_values.keys()))
             fish = cls(image_path, cls.fish_values[image_path])
@@ -36,15 +36,5 @@ class Fishes(pygame.sprite.Sprite):
         self.rect.x += self.velocity
         if self.rect.left > WIDTH:
             self.rect.right = 0
-# Inside the play_game() function where fish objects are created:
-# Create background fish (example)
-fish_values = {
-    "fishes/orange_fish1.png": 5,
-    "fishes/green_fish.png": 3,
-    "fishes/yellow_fish.png": 4,
-}
-for _ in range(10):
-    image_path = random.choice(list(fish_values.keys()))
-    fish = Fishes(image_path, fish_values[image_path])
-    fishes_group.add(fish)
+
 
