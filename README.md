@@ -5,7 +5,7 @@ How to play: use your arrow keys to move the fish across the screen, press the s
 
 resources:
 
-chatGPT
-chomp game 
-stackoverflow.com
+chatGPT,
+chomp game, 
+https://stackoverflow.com/questions/70832093/pygame-in-python,
 teachwithtim.com
